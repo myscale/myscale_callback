@@ -122,7 +122,7 @@
           "refId": "A"
         }
       ],
-      "title": "User Total Token Usage",
+      "title": "Top 10 Users by Total Prompt Token Usage",
       "type": "barchart"
     },
     {
@@ -227,7 +227,7 @@
           "refId": "A"
         }
       ],
-      "title": "User Token Usage Time Series",
+      "title": "Top 10 Daily Prompt Token Usage by User",
       "type": "timeseries"
     },
     {
@@ -362,9 +362,9 @@
       },
       {
         "current": {
-          "selected": true,
-          "text": "scinav_otel_dev",
-          "value": "scinav_otel_dev"
+          "selected": false,
+          "text": "INFORMATION_SCHEMA",
+          "value": "INFORMATION_SCHEMA"
         },
         "datasource": {
           "type": "grafana-clickhouse-datasource",
@@ -387,8 +387,8 @@
       {
         "current": {
           "selected": false,
-          "text": "otel_traces",
-          "value": "otel_traces"
+          "text": "COLUMNS",
+          "value": "COLUMNS"
         },
         "datasource": {
           "type": "grafana-clickhouse-datasource",
@@ -410,9 +410,10 @@
       },
       {
         "current": {
-          "selected": true,
-          "text": "evaluation_user",
-          "value": "evaluation_user"
+          "isNone": true,
+          "selected": false,
+          "text": "None",
+          "value": ""
         },
         "datasource": {
           "type": "grafana-clickhouse-datasource",
@@ -440,8 +441,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "User Token Usage",
+  "title": "User Token Usage Dashboard",
   "uid": "ddn172j2t7chsf",
-  "version": 7,
+  "version": 9,
   "weekStart": ""
 }
