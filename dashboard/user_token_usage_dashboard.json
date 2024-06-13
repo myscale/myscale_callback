@@ -26,6 +26,7 @@
         "type": "grafana-clickhouse-datasource",
         "uid": "${datasource}"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -102,7 +103,7 @@
         {
           "datasource": {
             "type": "grafana-clickhouse-datasource",
-            "uid": "bdla4ano88k5ca"
+            "uid": "${datasource}"
           },
           "editorType": "sql",
           "format": 1,
@@ -116,13 +117,13 @@
               "table": ""
             }
           },
-          "pluginVersion": "4.0.6",
+          "pluginVersion": "4.0.8",
           "queryType": "table",
-          "rawSql": "SELECT\n    ResourceAttributes['user_id'] AS user_id,\n    sum(toUInt32(SpanAttributes['prompt_tokens'])) AS prompt_tokens\nFROM\n    ${database}.${table}\nWHERE\n    SpanKind = 'llm'\n    AND SpanAttributes['prompt_tokens'] != ''\n    AND StartTime BETWEEN $__fromTime AND $__toTime\nGROUP BY\n    user_id\nORDER BY\n    prompt_tokens DESC\nLIMIT 10",
+          "rawSql": "SELECT\n    ResourceAttributes['user_id'] AS user_id,\n    sum(toUInt32(SpanAttributes['prompt_tokens']) + toUInt32(SpanAttributes['completion_tokens'])*3) AS estimated_total_tokens\nFROM\n    ${database}.${table}\nWHERE\n    SpanKind = 'llm'\n    AND SpanAttributes['prompt_tokens'] != ''\n    AND StartTime BETWEEN $__fromTime AND $__toTime\nGROUP BY\n    user_id\nORDER BY\n    estimated_total_tokens DESC\nLIMIT 5",
           "refId": "A"
         }
       ],
-      "title": "Top 10 Users by Total Prompt Token Usage",
+      "title": "Top 5 Users By Token Usage For Selected Time Period (estimated_total_tokens = promt_tokens + 3*completion_tokens)",
       "type": "barchart"
     },
     {
@@ -141,27 +142,16 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 22,
+            "fillOpacity": 80,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
+            "lineWidth": 1,
             "scaleDistribution": {
               "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -185,23 +175,32 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 8,
         "w": 24,
         "x": 0,
         "y": 11
       },
-      "id": 2,
+      "id": 5,
       "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        }
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
       },
       "targets": [
         {
@@ -210,7 +209,7 @@
             "uid": "${datasource}"
           },
           "editorType": "sql",
-          "format": 0,
+          "format": 1,
           "meta": {
             "builderOptions": {
               "columns": [],
@@ -221,19 +220,19 @@
               "table": ""
             }
           },
-          "pluginVersion": "4.0.6",
-          "queryType": "timeseries",
-          "rawSql": "SELECT\n    toDate(StartTime) AS date,\n    ResourceAttributes['user_id'] AS user_id,\n    sum(toUInt32(SpanAttributes['prompt_tokens'])) AS prompt_tokens\nFROM\n    ${database}.${table}\nWHERE\n    SpanKind = 'llm'\n    AND SpanAttributes['prompt_tokens'] != ''\n    AND StartTime BETWEEN $__fromTime AND $__toTime\nGROUP BY\n    date,\n    user_id\nORDER BY\n    prompt_tokens DESC,\n    date ASC\nLIMIT 10",
+          "pluginVersion": "4.0.8",
+          "queryType": "table",
+          "rawSql": "SELECT\n    SpanAttributes['model'] AS metric,\n    sum(toUInt32(SpanAttributes['prompt_tokens'])) AS prompt_tokens,\n    sum(toUInt32(SpanAttributes['completion_tokens'])) AS completion_tokens,\n    sum(toUInt32(SpanAttributes['prompt_tokens']) + toUInt32(SpanAttributes['completion_tokens'])*3) AS estimated_total_tokens\nFROM\n    ${database}.${table}\nWHERE\n    SpanKind = 'llm'\n    AND SpanAttributes['prompt_tokens'] != ''\n    AND StartTime BETWEEN $__fromTime AND $__toTime\nGROUP BY\n    metric\nORDER BY\n    metric",
           "refId": "A"
         }
       ],
-      "title": "Top 10 Daily Prompt Token Usage by User",
-      "type": "timeseries"
+      "title": "Token Usage By Model For Selected Time Period",
+      "type": "barchart"
     },
     {
       "datasource": {
         "type": "grafana-clickhouse-datasource",
-        "uid": "${datasource}"
+        "uid": "edom687bveigwc"
       },
       "fieldConfig": {
         "defaults": {
@@ -293,7 +292,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 19
       },
       "id": 4,
       "options": {
@@ -312,7 +311,7 @@
         {
           "datasource": {
             "type": "grafana-clickhouse-datasource",
-            "uid": "bdla4ano88k5ca"
+            "uid": "edom687bveigwc"
           },
           "editorType": "sql",
           "format": 1,
@@ -326,9 +325,9 @@
               "table": ""
             }
           },
-          "pluginVersion": "4.0.6",
+          "pluginVersion": "4.0.8",
           "queryType": "table",
-          "rawSql": "SELECT\n    toDate(StartTime) AS date,\n    sum(toUInt32(SpanAttributes['prompt_tokens'])) AS prompt_tokens,\n    sum(toUInt32(SpanAttributes['completion_tokens'])) AS completion_tokens,\n    sum(toUInt32(SpanAttributes['total_tokens'])) AS total_tokens\nFROM\n    ${database}.${table}\nWHERE\n    SpanKind = 'llm'\n    AND ResourceAttributes['user_id'] = '${user_id}'\n    AND SpanAttributes['prompt_tokens'] != ''\n    AND StartTime BETWEEN $__fromTime AND $__toTime\nGROUP BY\n    date\nORDER BY\n    date",
+          "rawSql": "SELECT\n    toDate(StartTime) AS date,\n    sum(toUInt32(SpanAttributes['prompt_tokens'])) AS prompt_tokens,\n    sum(toUInt32(SpanAttributes['completion_tokens'])) AS completion_tokens,\n    sum(toUInt32(SpanAttributes['prompt_tokens']) + toUInt32(SpanAttributes['completion_tokens'])*3) AS estimated_total_tokens\nFROM\n    ${database}.${table}\nWHERE\n    SpanKind = 'llm'\n    AND ResourceAttributes['user_id'] = '${user_id}'\n    AND SpanAttributes['prompt_tokens'] != ''\n    AND StartTime BETWEEN $__fromTime AND $__toTime\nGROUP BY\n    date\nORDER BY\n    date",
           "refId": "A"
         }
       ],
@@ -345,7 +344,7 @@
         "current": {
           "selected": false,
           "text": "grafana-clickhouse-datasource",
-          "value": "bdla4ano88k5ca"
+          "value": "edom687bveigwc"
         },
         "hide": 0,
         "includeAll": false,
@@ -363,8 +362,8 @@
       {
         "current": {
           "selected": false,
-          "text": "INFORMATION_SCHEMA",
-          "value": "INFORMATION_SCHEMA"
+          "text": "scinav_otel_prod",
+          "value": "scinav_otel_prod"
         },
         "datasource": {
           "type": "grafana-clickhouse-datasource",
@@ -387,8 +386,8 @@
       {
         "current": {
           "selected": false,
-          "text": "COLUMNS",
-          "value": "COLUMNS"
+          "text": "otel_traces",
+          "value": "otel_traces"
         },
         "datasource": {
           "type": "grafana-clickhouse-datasource",
@@ -410,10 +409,9 @@
       },
       {
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "666047d39c5d4e4cb8efdd22",
+          "value": "666047d39c5d4e4cb8efdd22"
         },
         "datasource": {
           "type": "grafana-clickhouse-datasource",
@@ -436,13 +434,13 @@
     ]
   },
   "time": {
-    "from": "now-30d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "User Token Usage Dashboard",
-  "uid": "ddn172j2t7chsf",
-  "version": 9,
+  "title": "LLM Model Token Usage Analysis",
+  "uid": "ddn172j2t7chsv",
+  "version": 4,
   "weekStart": ""
 }
